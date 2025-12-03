@@ -1,0 +1,360 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.App {
+  min-height: 100vh;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Grid background */
+.App::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -7px;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 60px 60px;
+  transform: translateX(-0.5px);
+  z-index: 0;
+}
+
+/* Gradient fade overlay */
+.App::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(180deg, rgba(255, 180, 180, 0.35) 0%, transparent 25%),
+    radial-gradient(ellipse at center, transparent 0%, transparent 30%, rgba(255, 255, 255, 0.7) 60%, #ffffff 80%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Hero Header */
+.hero-header {
+  text-align: center;
+  margin-bottom: 50px;
+  position: relative;
+  z-index: 2;
+  transform: translateY(-80px);
+}
+
+.hero-title {
+  font-size: 48px;
+  font-weight: 800;
+  color: #F22F46;
+  margin-bottom: 20px;
+}
+
+.hero-highlight {
+  color: #F22F46;
+  font-style: italic;
+}
+
+.hero-features {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 35px;
+}
+
+.hero-features li {
+  color: #ff4d6d;
+  font-size: 16px;
+  font-weight: 600;
+  position: relative;
+  padding-left: 22px;
+  text-shadow: 0 0 10px rgba(255, 77, 109, 0.5), 0 0 20px rgba(255, 77, 109, 0.3);
+}
+
+.hero-features li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background: #ff4d6d;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255, 77, 109, 0.8), 0 0 15px rgba(255, 77, 109, 0.5);
+}
+
+/* Options Container - Side by Side Layout */
+.options-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  position: relative;
+  z-index: 2;
+  transform: translateY(-60px);
+}
+
+.option-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.option-label {
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.option-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  height: 300px;
+}
+
+.divider-line {
+  flex: 1;
+  width: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+}
+
+.divider-text {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 0;
+}
+
+.wave-container {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.wave-container:hover {
+  transform: scale(1.02);
+}
+
+.wave-container:active {
+  transform: scale(0.98);
+}
+
+.wave-circle {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid rgba(128, 128, 128, 0.5);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.siriwave-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Override siriwave canvas styles */
+.siriwave-wrapper canvas {
+  display: block;
+}
+
+.hint {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Call Button */
+.call-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: #1a1a1a;
+  border: none;
+  border-radius: 30px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.call-button:hover {
+  background: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.call-button:active {
+  transform: translateY(0);
+}
+
+.twilio-logo {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.button-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.button-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.button-subtitle {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.twilio-text {
+  font-weight: 700;
+  color: #F22F46;
+}
+
+/* QR Modal */
+.qr-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.qr-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  position: relative;
+  max-width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalIn 0.3s ease;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.qr-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.qr-close:hover {
+  color: #333;
+}
+
+.qr-twilio-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.qr-twilio-logo {
+  width: 32px;
+  height: 32px;
+}
+
+.qr-twilio-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: #F22F46;
+}
+
+.qr-modal h3 {
+  margin: 0 0 25px 0;
+  color: #F22F46;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.qr-code-container {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  display: inline-block;
+  border: 3px solid #F22F46;
+}
+
+.phone-number {
+  margin: 20px 0 10px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #F22F46;
+  letter-spacing: 1px;
+}
+
+.qr-hint {
+  margin: 0;
+  color: #888;
+  font-size: 14px;
+}
