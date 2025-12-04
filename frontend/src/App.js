@@ -29,6 +29,8 @@ function App() {
   const siriWaveContainerRef = useRef(null);
   const isBotSpeakingRef = useRef(false);
   const isUserSpeakingRef = useRef(false);
+  const userIdleTimeoutRef = useRef(null);
+  const botIdleTimeoutRef = useRef(null);
   
   // Web Audio API refs for real-time analysis
   const audioContextRef = useRef(null);
@@ -277,6 +279,11 @@ function App() {
           isBotSpeakingRef.current = false;
         },
         onUserStartedSpeaking: () => {
+          // User interrupts bot - stop bot instantly
+          if (isBotSpeakingRef.current) {
+            setIsBotSpeaking(false);
+            isBotSpeakingRef.current = false;
+          }
           setIsUserSpeaking(true);
           isUserSpeakingRef.current = true;
         },
@@ -286,30 +293,48 @@ function App() {
         },
         // Fallback: Use audio levels to detect speaking (client-side)
         onLocalAudioLevel: (level) => {
-          if (level > 0.1 && !isUserSpeakingRef.current) {
-            setIsUserSpeaking(true);
-            isUserSpeakingRef.current = true;
-          } else if (level < 0.05 && isUserSpeakingRef.current) {
-            // Use a small delay to avoid flickering
-            setTimeout(() => {
-              if (isUserSpeakingRef.current) {
-                setIsUserSpeaking(false);
-                isUserSpeakingRef.current = false;
-              }
-            }, 300);
-          }
-        },
-        onRemoteAudioLevel: (level) => {
-          if (level > 0.1 && !isBotSpeakingRef.current) {
-            setIsBotSpeaking(true);
-            isBotSpeakingRef.current = true;
-          } else if (level < 0.05 && isBotSpeakingRef.current) {
-            setTimeout(() => {
+          if (level > 0.05) {
+            // Cancel any pending idle timeout
+            if (userIdleTimeoutRef.current) {
+              clearTimeout(userIdleTimeoutRef.current);
+              userIdleTimeoutRef.current = null;
+            }
+            if (!isUserSpeakingRef.current) {
+              // User starts speaking - stop bot instantly (interruption)
               if (isBotSpeakingRef.current) {
                 setIsBotSpeaking(false);
                 isBotSpeakingRef.current = false;
               }
-            }, 300);
+              setIsUserSpeaking(true);
+              isUserSpeakingRef.current = true;
+            }
+          } else if (level <= 0 && isUserSpeakingRef.current && !userIdleTimeoutRef.current) {
+            // User stops speaking - wait 1.2s before changing animation
+            userIdleTimeoutRef.current = setTimeout(() => {
+              setIsUserSpeaking(false);
+              isUserSpeakingRef.current = false;
+              userIdleTimeoutRef.current = null;
+            }, 1200);
+          }
+        },
+        onRemoteAudioLevel: (level) => {
+          if (level > 0.05) {
+            // Cancel any pending idle timeout
+            if (botIdleTimeoutRef.current) {
+              clearTimeout(botIdleTimeoutRef.current);
+              botIdleTimeoutRef.current = null;
+            }
+            if (!isBotSpeakingRef.current) {
+              setIsBotSpeaking(true);
+              isBotSpeakingRef.current = true;
+            }
+          } else if (level <= 0 && isBotSpeakingRef.current && !botIdleTimeoutRef.current) {
+            // Bot stops speaking - wait 1.2s before changing animation
+            botIdleTimeoutRef.current = setTimeout(() => {
+              setIsBotSpeaking(false);
+              isBotSpeakingRef.current = false;
+              botIdleTimeoutRef.current = null;
+            }, 1200);
           }
         },
         onError: (err) => {
