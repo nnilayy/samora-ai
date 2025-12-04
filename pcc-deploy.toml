@@ -1,6 +1,6 @@
 # Pipecat Cloud Deployment Configuration
 agent_name = "samora-agent"
-image = "nnilayy/samora-agent:latest"
+image = "nnilayy/samora-agent:v2"
 region = "us-west"
 
 # Secrets
@@ -11,5 +11,5 @@ agent_profile = "agent-1x"
 
 # Auto-scaling
 [scaling]
-min_agents = 0
-max_agents = 5
+min_agents = 1
+max_agents = 2
