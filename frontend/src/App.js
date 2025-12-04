@@ -284,6 +284,34 @@ function App() {
           setIsUserSpeaking(false);
           isUserSpeakingRef.current = false;
         },
+        // Fallback: Use audio levels to detect speaking (client-side)
+        onLocalAudioLevel: (level) => {
+          if (level > 0.1 && !isUserSpeakingRef.current) {
+            setIsUserSpeaking(true);
+            isUserSpeakingRef.current = true;
+          } else if (level < 0.05 && isUserSpeakingRef.current) {
+            // Use a small delay to avoid flickering
+            setTimeout(() => {
+              if (isUserSpeakingRef.current) {
+                setIsUserSpeaking(false);
+                isUserSpeakingRef.current = false;
+              }
+            }, 300);
+          }
+        },
+        onRemoteAudioLevel: (level) => {
+          if (level > 0.1 && !isBotSpeakingRef.current) {
+            setIsBotSpeaking(true);
+            isBotSpeakingRef.current = true;
+          } else if (level < 0.05 && isBotSpeakingRef.current) {
+            setTimeout(() => {
+              if (isBotSpeakingRef.current) {
+                setIsBotSpeaking(false);
+                isBotSpeakingRef.current = false;
+              }
+            }, 300);
+          }
+        },
         onError: (err) => {
           console.error('Client error:', err);
           setStatus('idle');
