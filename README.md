@@ -34,6 +34,19 @@
 
 ## Overview
 
+## Observations/Gaps in Current Agents and Corresponding Fixes/Improvements  Introduced
+While testing Samora’s demos and exploring agent behavior, the following observations were made. For each, a corresponding feature or fix was introduced to address the gap/issue.
+
+| **Features**                                                         | **Observations in Current Samora Agents** | **Improvements Introduced** |
+| -------------------------------------------------------------------- | ----------------------------------------- | --------------------------- |
+| **Rolling Summarizer Context Window Manager**                        | -                                         | -                           |
+| **Put Agent on Hold and Resume Call When Back**                      | -                                         | -                           |
+| **Improved Call Ending for Agents**                                  | -                                         | -                           |
+| **Multilingual Language Support**                                    | -                                         | -                           |
+| **Improved Incorrect User-Idle Trigger During TTS–User Speech Gaps** | -                                         | -                           |
+| **Tuned VAD for Better Interruption and Turn Detection**             | -                                         | -                           |
+| **Fixed Tool Call / System Prompt Spillover to LLM and TTS Output**  | -                                         | -                           |
+
 ## Features
 
 To address the observed gaps and demo a more holistic experience, a scenario was built around a Voice AI Agent serving as a Hotel Front Desk concierge, similar to other Samora agents in hospitality and service domains.
