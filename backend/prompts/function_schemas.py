@@ -1,236 +1,99 @@
-#
-# Function Schemas - LLM function definitions for Pipecat
-#
+# Function schemas for control functions (DB functions use Direct Functions pattern)
 
 from pipecat.adapters.schemas.function_schema import FunctionSchema
 
-from .function_descriptions import (
-    HOLD_FUNCTION_DESCRIPTION,
-    END_CALL_FUNCTION_DESCRIPTION,
-    GET_PRICING_DESCRIPTION,
-    GET_AMENITIES_DESCRIPTION,
-    LOOKUP_BOOKING_DESCRIPTION,
-    ADD_SPECIAL_REQUEST_DESCRIPTION,
-    CANCEL_BOOKING_DESCRIPTION,
-    CHECK_AVAILABILITY_DESCRIPTION,
-    BOOK_ROOM_DESCRIPTION,
-    UPDATE_BOOKING_DESCRIPTION,
-)
-
-
-# ============ CONTROL FUNCTIONS ============
-
 hold_function = FunctionSchema(
     name="put_on_hold",
-    description=HOLD_FUNCTION_DESCRIPTION,
+    description="""Put the conversation on hold when the user indicates they need a moment. 
+Call this when user says things like:
+- "hold on", "hold please", "one moment"
+- "give me a minute", "give me a second"  
+- "I need to think", "let me think"
+- "wait", "pause", "just a moment"
+- "I'm talking to someone else"
+- "be right back", "brb"
+- "hang on"
+- "stay on the line"
+The bot will wait silently until the user says a wake phrase like 'hey samora' or 'I'm back'.""",
     properties={},
-    required=[]
+    required=[],
 )
 
 end_call_function = FunctionSchema(
     name="end_call",
-    description=END_CALL_FUNCTION_DESCRIPTION,
+    description="""
+Gracefully end the call **only after** confirming that the caller has no further questions or needs. The end_call tool should be called **only after a polite two-step check**, ensuring the guest is ready to leave the conversation.
+
+=======================
+✨ HOW TO HANDLE CALL ENDING
+=======================
+
+✅ STEP 1: ASK A KIND FINAL CHECK
+Always ask a gentle closing question when the conversation *seems* to be ending, no matter the context:
+> "Is there anything else I can help you with today — maybe something about your reservation, our amenities, or anything else at all?"
+
+✅ STEP 2: WAIT FOR CLEAR CONFIRMATION
+Only call `end_call` **after** the guest clearly confirms they have nothing else to ask or say. Common confirmation phrases include:
+
+• "No, that's all." / "Nope, I'm good."  
+• "Thanks, that's everything." / "I'm all set."  
+• "That's it for now." / "Nothing else."  
+• "Thanks, bye." / "Talk later." / "Take care." / "Goodbye."  
+• "I have to go now." / "I'm being called, sorry!" / "We'll plan later, thank you."
+
+DO NOT call `end_call` if:
+- The guest is still asking questions.
+- The guest says "okay" or "alright" (this might mean "go on", not "goodbye").
+- You have not yet offered a final help prompt.
+
+=======================
+⚠️ CONTEXTS WHERE THIS APPLIES
+=======================
+
+This process applies to **every scenario**, including:
+• After booking a room  
+• After checking availability  
+• After cancelling or modifying a reservation  
+• After explaining amenities or room types  
+• Even if the caller abruptly says they need to leave
+
+The call should **always** end gracefully, with a moment of confirmation. Samora must **never hang up abruptly** without giving the caller a final moment to ask something else.
+
+=======================
+💬 EXAMPLES OF CORRECT BEHAVIOR
+=======================
+
+✅ Example 1: Caller is satisfied after a booking
+Caller: That's perfect. Thanks a lot!  
+Samora: I'm so glad I could help! Before we wrap up — is there anything else you'd like to ask or check on?  
+Caller: Nope, that's everything. Thanks again!  
+→ Call end_call ✅
+
+✅ Example 2: Caller says they need to leave abruptly
+Caller: Oh, I'm sorry — I have to go. Someone's calling me.  
+Samora: No worries at all — before we hang up, would you like me to help with anything else real quick?  
+Caller: No no, I'm good! We'll continue another time.  
+→ Call end_call ✅
+
+✅ Example 3: Caller says they'll plan later
+Caller: We're still deciding, so I'll check with my partner and call back.  
+Samora: That sounds good — would you like me to hold anything or help with anything else for now?  
+Caller: No, we're fine for now. Thank you!  
+→ Call end_call ✅
+
+🚫 Example 4: Caller is still deciding
+Caller: Hmm… okay.  
+Samora: And just to check, is there anything else I can help you with today?  
+Caller: Actually, can you tell me if the spa has massage appointments in the evening?  
+→ DO NOT call end_call ❌
+
+=======================
+📝 FINAL NOTES
+=======================
+
+• The farewell message is handled by the function itself — Samora should not say anything after `end_call` is triggered.  
+• Samora must always sound warm, patient, and never abrupt — the guest should feel like they're gently and courteously guided off the call.
+""",
     properties={},
-    required=[]
-)
-
-
-# ============ HOTEL BOOKING FUNCTIONS ============
-
-get_pricing_function = FunctionSchema(
-    name="get_pricing",
-    description=GET_PRICING_DESCRIPTION,
-    properties={
-        "room_type": {
-            "type": "string",
-            "enum": ["standard", "deluxe", "suite"],
-            "description": "The room type to get pricing for. Optional - omit to get all room prices."
-        }
-    },
-    required=[]
-)
-
-get_amenities_function = FunctionSchema(
-    name="get_amenities",
-    description=GET_AMENITIES_DESCRIPTION,
-    properties={
-        "room_type": {
-            "type": "string",
-            "enum": ["standard", "deluxe", "suite"],
-            "description": "The room type to get amenities for."
-        }
-    },
-    required=["room_type"]
-)
-
-lookup_booking_function = FunctionSchema(
-    name="lookup_booking",
-    description=LOOKUP_BOOKING_DESCRIPTION,
-    properties={
-        "confirmation_number": {
-            "type": "string",
-            "description": "The booking confirmation number (e.g., GV-2025-001001)"
-        },
-        "guest_name": {
-            "type": "string",
-            "description": "The guest's full or partial name"
-        },
-        "guest_email": {
-            "type": "string",
-            "description": "The guest's email address"
-        },
-        "guest_phone": {
-            "type": "string",
-            "description": "The guest's phone number"
-        }
-    },
-    required=[]
-)
-
-add_special_request_function = FunctionSchema(
-    name="add_special_request",
-    description=ADD_SPECIAL_REQUEST_DESCRIPTION,
-    properties={
-        "confirmation_number": {
-            "type": "string",
-            "description": "The booking confirmation number"
-        },
-        "guest_name": {
-            "type": "string",
-            "description": "The guest's name (alternative to confirmation number)"
-        },
-        "guest_email": {
-            "type": "string",
-            "description": "The guest's email (alternative to confirmation number)"
-        },
-        "request": {
-            "type": "string",
-            "description": "The special request to add (e.g., 'late check-in', 'extra pillows', 'baby crib')"
-        }
-    },
-    required=["request"]
-)
-
-cancel_booking_function = FunctionSchema(
-    name="cancel_booking",
-    description=CANCEL_BOOKING_DESCRIPTION,
-    properties={
-        "confirmation_number": {
-            "type": "string",
-            "description": "The booking confirmation number"
-        },
-        "guest_name": {
-            "type": "string",
-            "description": "The guest's name (alternative to confirmation number)"
-        },
-        "guest_email": {
-            "type": "string",
-            "description": "The guest's email (alternative to confirmation number)"
-        }
-    },
-    required=[]
-)
-
-check_availability_function = FunctionSchema(
-    name="check_availability",
-    description=CHECK_AVAILABILITY_DESCRIPTION,
-    properties={
-        "check_in_date": {
-            "type": "string",
-            "description": "Check-in date in YYYY-MM-DD format (e.g., 2025-12-15)"
-        },
-        "check_out_date": {
-            "type": "string",
-            "description": "Check-out date in YYYY-MM-DD format (e.g., 2025-12-18)"
-        },
-        "room_type": {
-            "type": "string",
-            "enum": ["standard", "deluxe", "suite"],
-            "description": "Optional - filter by specific room type"
-        },
-        "num_guests": {
-            "type": "integer",
-            "description": "Optional - number of guests to accommodate"
-        }
-    },
-    required=["check_in_date", "check_out_date"]
-)
-
-book_room_function = FunctionSchema(
-    name="book_room",
-    description=BOOK_ROOM_DESCRIPTION,
-    properties={
-        "guest_name": {
-            "type": "string",
-            "description": "Full name of the guest"
-        },
-        "guest_phone": {
-            "type": "string",
-            "description": "Guest's phone number"
-        },
-        "guest_email": {
-            "type": "string",
-            "description": "Guest's email address"
-        },
-        "room_type": {
-            "type": "string",
-            "enum": ["standard", "deluxe", "suite"],
-            "description": "Type of room to book"
-        },
-        "check_in_date": {
-            "type": "string",
-            "description": "Check-in date in YYYY-MM-DD format"
-        },
-        "check_out_date": {
-            "type": "string",
-            "description": "Check-out date in YYYY-MM-DD format"
-        },
-        "num_guests": {
-            "type": "integer",
-            "description": "Number of guests staying"
-        },
-        "special_requests": {
-            "type": "array",
-            "items": {"type": "string"},
-            "description": "Optional list of special requests"
-        }
-    },
-    required=["guest_name", "guest_phone", "guest_email", "room_type", "check_in_date", "check_out_date", "num_guests"]
-)
-
-update_booking_function = FunctionSchema(
-    name="update_booking",
-    description=UPDATE_BOOKING_DESCRIPTION,
-    properties={
-        "confirmation_number": {
-            "type": "string",
-            "description": "The booking confirmation number"
-        },
-        "guest_name": {
-            "type": "string",
-            "description": "Guest's name (alternative to confirmation number)"
-        },
-        "guest_email": {
-            "type": "string",
-            "description": "Guest's email (alternative to confirmation number)"
-        },
-        "new_check_in_date": {
-            "type": "string",
-            "description": "New check-in date in YYYY-MM-DD format"
-        },
-        "new_check_out_date": {
-            "type": "string",
-            "description": "New check-out date in YYYY-MM-DD format"
-        },
-        "new_room_type": {
-            "type": "string",
-            "enum": ["standard", "deluxe", "suite"],
-            "description": "New room type"
-        },
-        "new_num_guests": {
-            "type": "integer",
-            "description": "New number of guests"
-        }
-    },
-    required=[]
+    required=[],
 )
