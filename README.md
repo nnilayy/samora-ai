@@ -36,6 +36,30 @@
 
 ## Features
 
+To address the observed gaps and demo a more holistic experience, a scenario was built around a Voice AI Agent serving as a Hotel Front Desk concierge, similar to other Samora agents in hospitality and service domains.
+
+In addition to addressing the observed gaps, the following features are part of the Samora-Extended Demo, showcasing a complete, fully functional concierge agent.
+
+* **Live MongoDB Database Access**: Connected to a MongoDB instance, the agent handles hotel tasks like availability checks, bookings, updates, cancellations, and special requests. All write operations are executed in real time using custom tools for each database function, with updates reflected instantly and confirmed once complete. The agent supports eight dedicated database tools: `check_availability`, `book_room`, `lookup_booking`, `update_booking`, `cancel_booking`, `add_special_request`, `get_amenities`, and `get_pricing`.
+
+* **Agent Configuration**: A frontend Settings panel allows dynamic selection of LLM, TTS, and STT models at runtime. Any combination of one model from each category can be selected without redeployment.
+
+  * **STT Models**: Deepgram (`nova-3`), ElevenLabs (`scribe_v2_realtime`)
+  * **LLM Models**: OpenAI (`gpt-4o-mini`), Cerebras (`llama-3.3-70b`), Groq (`llama-3.3-70b-versatile`), Google (`gemini-2.5-flash`)
+  * **TTS Models**: Deepgram (`aura-2-theia-en`), Cartesia (Voice ID `248be419-c632-4f23-adf1-5324ed7dbf1d`)
+
+* **Context Configuration**: A frontend UI to configure when the Rolling Context Summarizer activates and how much recent conversation to retain. This helps manage token usage in the long run and cut down on costs, while maintaining continuity in long conversations. The following parameters are exposed in the Settings panel:
+
+  * `context_threshold`: Number of messages after which summarization is triggered
+  * `context_keep_recent`: Number of most recent messages to keep in the latest context without being summarized
+
+* **Web Deployment**: Backend hosted on Pipecat Cloud and frontend on Vercel. The agent is accessible via both the website and a Twilio phone number, supporting smooth interaction across browser and phone.
+
+  * **Web Site for Web Agent Access**: [https://samora-extended.nnilayy.com/](https://samora-extended.nnilayy.com/)
+  * **Twilio Phone Number for Phone-based Agent Interaction**: +1 (520) 652-1762
+
+
+
 ## License
 
 This project is licensed under the **MIT License** - checkout the [LICENSE](LICENSE) for more details.
