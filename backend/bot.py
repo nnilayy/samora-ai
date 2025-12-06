@@ -1,5 +1,6 @@
 import os
 import re
+import asyncio
 from loguru import logger
 from dotenv import load_dotenv
 from deepgram import LiveOptions
@@ -13,7 +14,7 @@ from pipecat.services.groq.llm import GroqLLMService
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.services.google.llm import GoogleLLMService
 from pipecat.services.openai.llm import OpenAILLMService
-# from pipecat.transports.daily.transport import DailyParams
+from pipecat.transports.daily.transport import DailyParams
 from pipecat.services.llm_service import FunctionCallParams
 from pipecat.services.cerebras.llm import CerebrasLLMService
 from pipecat.services.cartesia.tts import CartesiaTTSService
@@ -36,6 +37,7 @@ from pipecat.processors.aggregators.llm_response_universal import (
 from pipecat.frames.frames import (
     Frame,
     EndFrame,
+    EndTaskFrame,
     LLMRunFrame,
     TTSSpeakFrame,
     TranscriptionFrame,
@@ -115,25 +117,25 @@ class HoldWakeProcessor(FrameProcessor):
 
 
 transport_params = {
-    # "daily": lambda: DailyParams(
-    #     audio_in_enabled=True,
-    #     audio_out_enabled=True,
-    #     vad_analyzer=SileroVADAnalyzer(params=VADParams(stop_secs=0.3)),
-    #     turn_analyzer=LocalSmartTurnAnalyzerV3(params=SmartTurnParams()),
-    # ),
+    "daily": lambda: DailyParams(
+        audio_in_enabled=True,
+        audio_out_enabled=True,
+        vad_analyzer=SileroVADAnalyzer(params=VADParams(stop_secs=0.8, min_volume=0.45)),
+        turn_analyzer=LocalSmartTurnAnalyzerV3(params=SmartTurnParams()),
+    ),
     "webrtc": lambda: TransportParams(
         audio_in_enabled=True,
         audio_out_enabled=True,
         vad_analyzer=SileroVADAnalyzer(
-            params=VADParams(stop_secs=0.8)
-        ),  # Increased from 0.3 to reduce split transcriptions
+            params=VADParams(stop_secs=0.8, min_volume=0.45)
+        ),  # Increased stop_secs from 0.3 to reduce split transcriptions
         turn_analyzer=LocalSmartTurnAnalyzerV3(params=SmartTurnParams()),
     ),
     "twilio": lambda: FastAPIWebsocketParams(
         audio_in_enabled=True,
         audio_out_enabled=True,
         add_wav_header=False,
-        vad_analyzer=SileroVADAnalyzer(params=VADParams(stop_secs=0.3)),
+        vad_analyzer=SileroVADAnalyzer(params=VADParams(stop_secs=0.8, min_volume=0.45)),
         turn_analyzer=LocalSmartTurnAnalyzerV3(params=SmartTurnParams()),
     ),
 }
@@ -143,7 +145,7 @@ async def run_bot(transport: BaseTransport, runner_args, config: dict):
     logger.info("Starting Samora AI bot...")
 
     # ============ PROVIDER CONFIG ============
-    llm_provider = config.get("llm_provider", "openai")
+    llm_provider = config.get("llm_provider", "google")
     stt_provider = config.get("stt_provider", "deepgram")
     tts_provider = config.get("tts_provider", "cartesia")
 
@@ -168,7 +170,7 @@ async def run_bot(transport: BaseTransport, runner_args, config: dict):
             ),
         )
         logger.info("STT: Deepgram Nova-3")
-    else:  # elevenlabs (default)
+    else:  # elevenlabs
         elevenlabs_key = config.get("elevenlabs_api_key") or os.getenv(
             "ELEVENLABS_API_KEY", ""
         )
@@ -220,7 +222,7 @@ async def run_bot(transport: BaseTransport, runner_args, config: dict):
             voice="aura-2-theia-en",  # Australian, feminine, expressive, polite, sincere
         )
         logger.info("TTS: Deepgram Aura-2 Theia")
-    else:  # cartesia (default)
+    else:  # cartesia
         cartesia_key = config.get("cartesia_api_key") or os.getenv(
             "CARTESIA_API_KEY", ""
         )
@@ -297,14 +299,13 @@ async def run_bot(transport: BaseTransport, runner_args, config: dict):
 
     async def end_call(params: FunctionCallParams):
         logger.info("Ending call gracefully")
-        await task.queue_frames(
-            [
-                TTSSpeakFrame(
-                    "It was great talking with you! Feel free to reach out anytime. Take care!"
-                ),
-                EndFrame(),
-            ]
+        await task.queue_frame(
+            TTSSpeakFrame(
+                "It was great talking with you! Feel free to reach out anytime. Take care!"
+            )
         )
+        await asyncio.sleep(7)
+        await task.queue_frame(EndFrame())
         properties = FunctionCallResultProperties(run_llm=False)
         await params.result_callback({"status": "call_ended"}, properties=properties)
 
@@ -395,7 +396,7 @@ async def run_bot(transport: BaseTransport, runner_args, config: dict):
     await runner.run(task)
 
     # Save chat history after pipeline finishes
-    save_chat_history(context.messages)
+    # save_chat_history(context.messages)
 
 
 async def bot(runner_args):
@@ -405,7 +406,7 @@ async def bot(runner_args):
 
     config = {
         # Provider selections (defaults if not specified)
-        "llm_provider": body.get("llm_provider", "openai"),
+        "llm_provider": body.get("llm_provider", "google"),
         "stt_provider": body.get("stt_provider", "deepgram"),
         "tts_provider": body.get("tts_provider", "cartesia"),
         # API keys (optional overrides)
