@@ -505,10 +505,10 @@ function App() {
           <span className="hero-highlight">Meet Samora-Extended</span>
         </h1>
         <ul className="hero-features">
+          <li>Rolling Summarization Context Window Support</li>
           <li>Put on Hold and Return Back</li>
           <li>Improved Call Ending</li>
           <li>Improved Multilingual Support</li>
-          <li>Improved Interruptions and Turn Detection</li>
         </ul>
       </div>
       
