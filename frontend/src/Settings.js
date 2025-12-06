@@ -10,12 +10,12 @@ const LLM_PROVIDERS = [
 ];
 
 const STT_PROVIDERS = [
-  { value: 'elevenlabs', label: 'ElevenLabs Scribe v2', logo: 'https://img.logo.dev/elevenlabs.io?token=pk_buX28YqpQXOAIi11qHiUog' },
-  { value: 'deepgram', label: 'Deepgram Nova-3', logo: 'https://img.logo.dev/deepgram.com?token=pk_buX28YqpQXOAIi11qHiUog' },
+  { value: 'elevenlabs', label: 'ElevenLabs Scribe v2', logo: 'https://img.logo.dev/elevenlabs.io?token=pk_buX28YqpQXOAIi11qHiUog', note: '✓ Multilingual STT supported' },
+  { value: 'deepgram', label: 'Deepgram Nova-3', logo: 'https://img.logo.dev/deepgram.com?token=pk_buX28YqpQXOAIi11qHiUog', note: '✓ Multilingual STT supported' },
 ];
 
 const TTS_PROVIDERS = [
-  { value: 'deepgram', label: 'Deepgram Aura-2 Theia', logo: 'https://img.logo.dev/deepgram.com?token=pk_buX28YqpQXOAIi11qHiUog', warning: '⚠️ Multilingual output not supported' },
+  { value: 'deepgram', label: 'Deepgram Aura-2 Theia', logo: 'https://img.logo.dev/deepgram.com?token=pk_buX28YqpQXOAIi11qHiUog', warning: '⚠️ Multilingual TTS not supported' },
   { value: 'cartesia', label: 'Cartesia', logo: 'https://img.logo.dev/cartesia.ai?token=pk_buX28YqpQXOAIi11qHiUog', note: '✓ Multilingual TTS supported' },
 ];
 
